@@ -1,0 +1,2 @@
+# {{ iptables_policy_name }} rule
+-A INPUT -m state --state NEW -m {{ iptables_protocol|default('tcp') }} -p {{ iptables_protocol|default('tcp') }} --dport {{ iptables_port }} --source {{ iptables_source|default('0.0.0.0/0') }} -j ACCEPT

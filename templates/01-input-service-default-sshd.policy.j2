@@ -1,0 +1,4 @@
+# Be sure to have sshd open for management stations/subnet through iptables_sshd_allowed_from list at ansible level
+{% for ip in iptables_sshd_allowed_from %}
+-A INPUT -m state --state NEW -m tcp -p tcp --source {{ ip }} --dport 22 -j ACCEPT 
+{% endfor %}

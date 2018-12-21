@@ -1,0 +1,83 @@
+# some cloud images don't have firewalld, so installing to then disable it
+- name: Ensuring iptables pkgs are installed on CentOS 7.x 
+  yum: name={{ item }} state=installed
+  with_items:
+    - firewalld
+    - iptables-services
+  when: ansible_distribution_major_version == "7" or ansible_distribution == "Fedora"
+
+- name: Ensuring firewalld is stopped on CentOS 7.x
+  service: 
+    name: firewalld 
+    state: stopped 
+    enabled: no
+  when: ansible_distribution_major_version == "7" or ansible_distribution == "Fedora"
+
+- name: Ensuring iptables.d folder exists
+  file: 
+    path: /etc/sysconfig/iptables.d 
+    state: directory
+
+- name: Dropping all default iptables rules
+  copy: 
+    src: "{{ item }}" 
+    dest: "/etc/sysconfig/iptables.d/{{ item }}"
+  with_items:
+    - 99-filter-commit
+    - 98-forward-0_head
+    - 98-forward-z_foot
+    - 01-input-0_head
+    - 01-input-z_foot
+    - 00-nat-0_head
+    - 00-nat-commit
+
+- name: Configuring incoming sshd allowed IP
+  template:
+    src: 01-input-service-default-sshd.policy.j2
+    dest: /etc/sysconfig/iptables.d/01-input-service-default-sshd.policy
+
+- name: Implementing local firewall rule[s], if any
+  template: 
+    src: 01-input-localrules-policy.j2 
+    dest: /etc/sysconfig/iptables.d/01-input-localrules-policy
+  when: iptables_local_input_rules is defined
+
+- name: Adding rules for Docker host[s]
+  copy: 
+    src: "{{ item }}" 
+    dest: "/etc/sysconfig/iptables.d/{{ item }}"
+  with_items:
+    - 00-nat-10-postrouting-docker
+    - 98-forward-10-docker
+  when: iptables_docker_host
+
+- name: Adding forward/NAT rule if needed
+  template: 
+    src: "{{ item }}.j2" 
+    dest: "/etc/sysconfig/iptables.d/{{ item }}"
+  with_items:
+    - 00-nat-11-postrouting
+    - 00-nat-12-prerouting
+    - 98-forward-11-allow
+  when: iptables_gw
+
+- name: Enabling ipv4 routing
+  sysctl: 
+    name: net.ipv4.ip_forward 
+    value: 1 
+    state: present 
+    reload: yes
+  when: iptables_gw
+
+
+
+- name: Building iptables config file
+  assemble: src=/etc/sysconfig/iptables.d/ dest=/etc/sysconfig/iptables
+  notify: restart_iptables
+  register: iptables_config
+- name: Reloading iptables rules if changed now
+  service: name=iptables state=restarted
+  when: iptables_config is changed
+
+- name: Enabling the iptables service
+  service: name=iptables state=started enabled=yes

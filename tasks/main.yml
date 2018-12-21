@@ -1,0 +1,6 @@
+- include_tasks: iptables-config.yml
+  when: manage_iptables
+
+- include: ip6tables-config.yml
+  when: manage_iptables
+

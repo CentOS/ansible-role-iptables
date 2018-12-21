@@ -1,0 +1,23 @@
+{% for rule in iptables_nat_prerouting_allow %}
+
+{% if rule.protocol is defined -%}
+{% set iptables_protocol = '-p ' + rule.protocol %}
+{% else %}
+{% set iptables_protocol = '' %}
+{% endif -%}
+
+{% if rule.dport is defined -%}
+{% set iptables_dport = '--dport ' + rule.dport %}
+{% else %}
+{% set iptables_dport = '' %}
+{% endif -%}
+
+{% if rule.dest_host_port is defined -%}
+{% set iptables_dest_host_port = '--to-destination ' + rule.dest_host_port %}
+{% else %}
+{% set iptables_dest_host_port = '' %}
+{% endif -%}
+
+-A PREROUTING {{ iptables_protocol }} --source {{ rule.source|default('0.0.0.0/0') }} --destination {{ rule.destination|default('0.0.0.0/0') }} {{ iptables_dport }} -j {{ rule.action|default('DNAT') }} {{ iptables_dest_host_port }}
+
+{% endfor %}

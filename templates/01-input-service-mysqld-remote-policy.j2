@@ -1,0 +1,5 @@
+# mysql client connections from {{ inventory_hostname }}
+{% for ip in ansible_all_ipv4_addresses %}
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 3306 --source {{ ip }} -j ACCEPT
+{% endfor %}
+# End of iptables rules for mysqld from {{ inventory_hostname }}

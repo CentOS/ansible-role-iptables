@@ -1,0 +1,18 @@
+{% for rule in iptables_forward_allow %}
+
+{% if rule.protocol is defined -%}
+{% set iptables_protocol = '-p ' + rule.protocol %}
+{% else %}
+{% set iptables_protocol = '' %}
+{% endif -%}
+
+{% if rule.dport is defined -%}
+{% set iptables_dport = '--dport ' + rule.dport %}
+{% else %}
+{% set iptables_dport = '' %}
+{% endif -%}
+
+
+-A FORWARD {{ iptables_protocol }} --source {{ rule.source|default('0.0.0.0/0') }} --destination {{ rule.destination|default('0.0.0.0/0') }} {{ iptables_dport }} -j ACCEPT
+
+{% endfor %}

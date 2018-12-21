@@ -1,0 +1,20 @@
+- name: Creating custom iptables policy file[s]
+  template: 
+    src: roles/iptables/templates/01-input-service-policy-list.j2 
+    dest: /etc/sysconfig/iptables.d/01-input-service-policy-{{ iptables_policy_name }}
+  when: manage_iptables
+
+- name: Building iptables config file
+  assemble: 
+    src: /etc/sysconfig/iptables.d/ 
+    dest: /etc/sysconfig/iptables
+  register: iptables_service_policy
+  when: manage_iptables
+
+- name: Reloading custom iptables rule[s] if changed now
+  service: 
+    name: iptables 
+    state: restarted
+  when: iptables_service_policy is changed
+  notify: restart_iptables
+

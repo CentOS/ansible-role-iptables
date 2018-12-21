@@ -1,0 +1,22 @@
+# IPv6 part
+
+- name: Creating custom ip6tables policy file[s]
+  template: 
+    src: roles/iptables/templates/ipv6/01-input-service-policy.j2 
+    dest: /etc/sysconfig/ip6tables.d/01-input-service-policy-{{ iptables_policy_name }}
+  when: manage_iptables
+
+- name: Building ip6tables config file
+  assemble: 
+    src: /etc/sysconfig/ip6tables.d/ 
+    dest: /etc/sysconfig/ip6tables
+  register: iptables_service_policy
+  when: manage_iptables
+
+- name: Reloading custom ip6tables rule[s] if changed now
+  service: 
+    name: ip6tables 
+    state: restarted
+  when: iptables_service_policy is changed
+  notify: restart_iptables
+

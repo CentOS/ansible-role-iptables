@@ -1,0 +1,12 @@
+# Local rules defined through ansible iptables_local_input_rules
+{% for rule in iptables_local_input_rules %}
+
+{% if rule.dport is defined -%}
+{% set iptables_dport = '--dport ' + rule.dport %}
+{% else %}
+{% set iptables_dport = '' %}
+{% endif -%}
+
+-A INPUT -p {{ rule.protocol|default('tcp') }} --source {{ rule.source|default('0.0.0.0/0') }} {{ iptables_dport }} -j ACCEPT
+
+{% endfor %}

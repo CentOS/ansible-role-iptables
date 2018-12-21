@@ -1,0 +1,57 @@
+# First if we want to bypass iptables config
+# Default: true, can be false
+manage_iptables: True
+
+# This role will cover both ipv4 and ipv6 so take that into account
+# Some vars are specific to one or the other
+
+# IPv4 default variables
+# sshd tuning : ideally not wide-open, so you can restrict through list
+# Default for the role to wide-open
+iptables_sshd_allowed_from:
+  - 0.0.0.0/0
+
+# Local iptables rules not defined by roles
+# Not present by default, so skipped by iptables task/main.yml
+# protocol default: tcp
+# source default: 0.0.0.0/0
+# iptables_local_input_rules:
+#   - source: "192.168.0.0/24"
+#     dport: "80"
+#     protocol: tcp
+#   - dport  
+
+# if the node is a firewall/gateway
+iptables_gw: false
+
+# if it's a gw, what do we forward/allow (lists)
+iptables_forward_allow:
+  - source: "192.168.0.0/24"
+    destination: "0.0.0.0/24"
+    protocol: tcp
+    dport: "80"
+iptables_nat_postrouting_allow:
+  - source: "192.168.0.0/24"
+    destination: "0.0.0.0/24"
+    protocol: tcp
+
+# For iptables_nat_postrouting_allow we can also specify the action :
+#   action: ACCEPT #it defaults to MASQUERADE
+ 
+# Docker host ? (for the docker specific nat rules
+iptables_docker_host: false
+
+##############################
+# IPv6 default variables
+##############################
+
+ip6tables_gw: False
+
+ip6tables_sshd_allowed_from:
+  - "::/0"
+
+# IPv6 gateway forward rules - all by default
+ip6tables_forward_allow:
+  - source: "::/0"
+    destination: "::/0"
+
