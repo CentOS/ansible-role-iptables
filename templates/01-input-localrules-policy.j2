@@ -7,6 +7,29 @@
 {% set iptables_dport = '' %}
 {% endif -%}
 
--A INPUT -p {{ rule.protocol|default('tcp') }} --source {{ rule.source|default('0.0.0.0/0') }} {{ iptables_dport }} -j ACCEPT
+# Note that the conditional is flipped from how we handle the dport, this is
+# because previously we set a default to tcp if the protocol was undefined. If
+# we want to set ip-based INPUT rules (for all protocols), we need to
+# explicitly set rule.protocol to None
+{% if rule.protocol == '' -%}
+{% set iptables_protocol = '' %}
+{% else %}
+{% set iptables_protocol = '-p ' + rule.protocol %}
+{% endif %}
+
+{% if rule.source == '' %}
+{% set iptables_source = '' %}
+{% else %}
+{% set iptables_source = '--source ' + rule.source|default('0.0.0.0/0') %}
+{% endif %}
+
+# This is a 'new' conditional, so we can use the same pattern as above
+{% if rule.destination is defined -%}
+{% set iptables_destination = '--destination ' + rule.destination %}
+{% else %}
+{% set iptables_destination = '' %}
+{% endif %}
+
+-A INPUT {{ iptables_protocol }} {{ iptables_source }} {{ iptables_dport }}  {{ iptables_destination }} -j ACCEPT
 
 {% endfor %}
