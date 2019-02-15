@@ -14,12 +14,17 @@ iptables_sshd_allowed_from:
 # Local iptables rules not defined by roles
 # Not present by default, so skipped by iptables task/main.yml
 # protocol default: tcp
+# you can also define protocol: '' and it would mean ANY
 # source default: 0.0.0.0/0
+# you can also define source: '' and it would mean *
 # iptables_local_input_rules:
-#   - source: "192.168.0.0/24"
-#     dport: "80"
+#   - source: 192.168.0.0/24
+#     dport: 80
 #     protocol: tcp
-#   - dport  
+#   - dport: 25  # would open for all tcp/25  
+#   - protocol: ''
+#     source: ''
+#     destination: 225.0.0.50  # opens all just for that destination ip, multicast in this case
 
 # if the node is a firewall/gateway
 iptables_gw: false
@@ -29,7 +34,7 @@ iptables_forward_allow:
   - source: "192.168.0.0/24"
     destination: "0.0.0.0/24"
     protocol: tcp
-    dport: "80"
+    dport: 80
 iptables_nat_postrouting_allow:
   - source: "192.168.0.0/24"
     destination: "0.0.0.0/24"

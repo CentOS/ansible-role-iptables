@@ -7,7 +7,7 @@
 {% endif -%}
 
 {% if rule.dport is defined -%}
-{% set iptables_dport = '--dport ' + rule.dport %}
+{% set iptables_dport = '--dport ' + rule.dport|string %}
 {% else %}
 {% set iptables_dport = '' %}
 {% endif -%}

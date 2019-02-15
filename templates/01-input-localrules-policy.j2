@@ -2,7 +2,7 @@
 {% for rule in iptables_local_input_rules %}
 
 {% if rule.dport is defined -%}
-{% set iptables_dport = '--dport ' + rule.dport %}
+{% set iptables_dport = '--dport ' + rule.dport|string %}
 {% else %}
 {% set iptables_dport = '' %}
 {% endif -%}
@@ -25,12 +25,12 @@
 {% elif rule.source == '' %}
 {% set iptables_source = '' %}
 {% else %}
-{% set iptables_source = '--source ' + rule.source %}
+{% set iptables_source = '--source ' + rule.source|string %}
 {% endif %}
 
 {# This is a 'new' conditional, so we can use the same pattern as above #}
 {% if rule.destination is defined -%}
-{% set iptables_destination = '--destination ' + rule.destination %}
+{% set iptables_destination = '--destination ' + rule.destination|string %}
 {% else %}
 {% set iptables_destination = '' %}
 {% endif %}
