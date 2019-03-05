@@ -25,11 +25,17 @@
   with_items:
     - 99-filter-commit
     - 98-forward-0_head
-    - 98-forward-z_foot
-    - 01-input-0_head
-    - 01-input-z_foot
     - 00-nat-0_head
     - 00-nat-commit
+
+- name: Dropping templated iptables rules
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/sysconfig/iptables.d/{{ item }}"
+  with_items:
+    - 01-input-0_head
+    - 01-input-z_foot
+    - 98-forward-z_foot
 
 - name: Configuring incoming sshd allowed IP
   template:
