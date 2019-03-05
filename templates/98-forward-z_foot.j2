@@ -1,1 +1,3 @@
+{% if iptables_default_reject_footer -%}
 -A FORWARD -j REJECT --reject-with icmp-host-prohibited 
+{% endif %}

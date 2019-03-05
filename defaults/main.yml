@@ -35,6 +35,17 @@ iptables_gw_internal_iface: eth1
 # The "external" interface of the gateway
 iptables_gw_external_iface: eth0
 
+# Default chain policies. This is only active on the filter table
+iptables_default_input_policy: ACCEPT
+iptables_default_forward_policy: ACCEPT
+iptables_default_output_policy: ACCEPT
+
+# Add a default reject footer (you can do the same by setting the
+# default_*_policy for the chains. This is here to support backwards compat
+# with current systems that add a REJECT stanza for the INPUT and FORWARD
+# chains
+iptables_default_reject_footer: true
+
 
 # if it's a gw, what do we forward/allow (lists)
 iptables_forward_allow:
