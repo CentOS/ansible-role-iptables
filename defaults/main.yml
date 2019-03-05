@@ -29,6 +29,13 @@ iptables_sshd_allowed_from:
 # if the node is a firewall/gateway
 iptables_gw: false
 
+# The "internal" interface of the gateway
+iptables_gw_internal_iface: eth1
+
+# The "external" interface of the gateway
+iptables_gw_external_iface: eth0
+
+
 # if it's a gw, what do we forward/allow (lists)
 iptables_forward_allow:
   - source: "192.168.0.0/24"
@@ -59,4 +66,3 @@ ip6tables_sshd_allowed_from:
 ip6tables_forward_allow:
   - source: "::/0"
     destination: "::/0"
-
