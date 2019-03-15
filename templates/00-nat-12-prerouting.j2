@@ -7,13 +7,13 @@
 {% endif -%}
 
 {% if rule.dport is defined -%}
-{% set iptables_dport = '--dport ' + rule.dport %}
+{% set iptables_dport = '--dport ' + rule.dport|string %}
 {% else %}
 {% set iptables_dport = '' %}
 {% endif -%}
 
 {% if rule.dest_host_port is defined -%}
-{% set iptables_dest_host_port = '--to-destination ' + rule.dest_host_port %}
+{% set iptables_dest_host_port = '--to-destination ' + rule.dest_host_port|string %}
 {% else %}
 {% set iptables_dest_host_port = '' %}
 {% endif -%}

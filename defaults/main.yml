@@ -40,6 +40,21 @@ iptables_nat_postrouting_allow:
     destination: "0.0.0.0/24"
     protocol: tcp
 
+# DNAT and port-forwarding
+# default is empty list, but we can have something like
+# iptables_nat_prerouting_allow:
+#   - source: "0.0.0.0/0"
+#     dport: 8080
+#     dest_host_port: "192.168.122.2:80"
+# In this case, don't forget to add it in the iptables_forward_allow rules or it would be blocked
+# iptables_forward_allow:
+#   - source: "0.0.0.0/0"
+#     destination: 192.168.122.2
+#     protocol: tcp
+#     dport: 80
+iptables_nat_prerouting_allow: []
+
+
 # For iptables_nat_postrouting_allow we can also specify the action :
 #   action: ACCEPT #it defaults to MASQUERADE
  
