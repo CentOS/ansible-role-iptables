@@ -61,6 +61,13 @@
     - 98-forward-11-allow
   when: iptables_gw
 
+- name: Adding local redirect rules
+  template: 
+    src: "{{ item }}.j2" 
+    dest: "/etc/sysconfig/iptables.d/{{ item }}"
+  with_items:
+    - 00-nat-10-redirect
+
 - name: Enabling ipv4 routing
   sysctl: 
     name: net.ipv4.ip_forward 

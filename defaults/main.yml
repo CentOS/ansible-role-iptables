@@ -54,6 +54,12 @@ iptables_nat_postrouting_allow:
 #     dport: 80
 iptables_nat_prerouting_allow: []
 
+# Local redirect from port to other port
+# iptables_redirects:
+#   - dport: 10054
+#     lport: 10050
+# Redirect tcp/10054 to local tcp/10050
+iptables_redirects: []
 
 # For iptables_nat_postrouting_allow we can also specify the action :
 #   action: ACCEPT #it defaults to MASQUERADE

@@ -1,0 +1,9 @@
+{% for rule in iptables_redirects %}
+
+{% if rule.protocol is defined -%}
+{% set iptables_protocol = '-p ' + rule.protocol %}
+{% else %}
+{% set iptables_protocol = '-p tcp' %}
+{% endif -%}
+-A PREROUTING {{ iptables_protocol }} --dport {{ rule.dport }} -j REDIRECT --to-port {{ rule.lport }}
+{% endfor %}
