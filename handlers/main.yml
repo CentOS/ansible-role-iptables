@@ -1,7 +1,21 @@
+- name: rebuild_iptables
+  assemble: 
+    src: /etc/sysconfig/iptables.d/ 
+    dest: /etc/sysconfig/iptables
+  notify:
+    - restart_iptables
+
 - name: restart_iptables
   service: 
     name: iptables 
     state: restarted
+
+- name: rebuild_ip6tables
+  assemble: 
+    src: /etc/sysconfig/ip6tables.d/ 
+    dest: /etc/sysconfig/ip6tables
+  notify:
+    - restart_ip6tables
 
 - name: restart_ip6tables
   service: 
