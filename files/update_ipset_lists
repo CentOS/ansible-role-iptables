@@ -5,6 +5,7 @@
 # Ansible will also create the corresponding rules automatically based on names from that list
 #
 
+PATH=$PATH:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
 config_file="/etc/sysconfig/ipset-lists"
 log_file="/var/log/centos-ipset-update.log"
 
