@@ -4,19 +4,21 @@
   with_items:
     - firewalld
     - iptables-services
-  when: ansible_distribution_major_version == "7" or ansible_distribution == "Fedora"
+    - ipset
+    - ipset-service
 
 - name: Ensuring firewalld is stopped on CentOS 7.x
   service: 
     name: firewalld 
     state: stopped 
     enabled: no
-  when: ansible_distribution_major_version == "7" or ansible_distribution == "Fedora"
 
-- name: Ensuring iptables.d folder exists
+- name: Ensuring folders exist
   file: 
-    path: /etc/sysconfig/iptables.d 
+    path: "{{ item }}"
     state: directory
+  with_items:
+    - /etc/sysconfig/iptables.d
 
 - name: Dropping all default iptables rules
   copy: 
@@ -34,7 +36,50 @@
 - name: Configuring incoming sshd allowed IP
   template:
     src: 01-input-service-default-sshd.policy.j2
-    dest: /etc/sysconfig/iptables.d/01-input-service-default-sshd.policy
+    dest: /etc/sysconfig/iptables.d/01-input-allowed-sshd.policy
+
+- name: Ensuring we don't have old sshd policy in place
+  file:
+    path: /etc/sysconfig/iptables.d/01-input-service-default-sshd.policy
+    state: absent
+
+- name: Ensuring we have a default ipset blocked-centos-manual list
+  shell: 'ipset list -t|egrep -q blocked-centos-manual || ipset create blocked-centos-manual hash:ip'
+  args:
+    creates: /etc/sysconfig/ipset
+  notify:
+    - save_ipset
+
+- name: Script to update ipset lists
+  copy:
+    src: update_ipset_lists
+    dest: /usr/libexec/centos/update_ipset_lists
+    mode: 0755
+
+- name: Configuring ipset lists to update on regular basis
+  template:
+    src: ipset-lists.j2
+    dest: /etc/sysconfig/ipset-lists
+  register: ipset_lists_config
+
+- name: Forcing ipset lists update when modified
+  command: /usr/libexec/centos/update_ipset_lists
+  when: ipset_lists_config is changed
+
+- name: Refreshing ipset lists
+  cron:
+    name: ipset blacklist refresh
+    job: /usr/libexec/centos/update_ipset_lists
+    hour: "*/2"
+    state: present
+
+- name: Adding default ipset list for centos
+  template: 
+    src: "{{ item }}.j2"
+    dest: "/etc/sysconfig/iptables.d/{{ item }}"
+  with_items:
+    - 01-input-blocked-ipset-centos.policy
+    - 01-input-blocked-ipset-lists.policy
 
 - name: Implementing local firewall rule[s], if any
   template: 
@@ -56,7 +101,7 @@
     src: "{{ item }}.j2" 
     dest: "/etc/sysconfig/iptables.d/{{ item }}"
   with_items:
-    - 00-nat-11-postrouting
+   - 00-nat-11-postrouting
     - 00-nat-12-prerouting
     - 98-forward-11-allow
   when: iptables_gw
@@ -76,15 +121,24 @@
     reload: yes
   when: iptables_gw
 
-
-
 - name: Building iptables config file
-  assemble: src=/etc/sysconfig/iptables.d/ dest=/etc/sysconfig/iptables
+  assemble: 
+    src: /etc/sysconfig/iptables.d/ 
+    dest: /etc/sysconfig/iptables
   notify: restart_iptables
   register: iptables_config
+
 - name: Reloading iptables rules if changed now
-  service: name=iptables state=restarted
+  service: 
+    name: iptables 
+    state: restarted
   when: iptables_config is changed
 
-- name: Enabling the iptables service
-  service: name=iptables state=started enabled=yes
+- name: Enabling the iptables/ipset service[s]
+  service: 
+    name: "{{ item }}" 
+    state: started 
+    enabled: yes
+  with_items:
+    - iptables
+    - ipset

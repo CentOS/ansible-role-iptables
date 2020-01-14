@@ -20,4 +20,8 @@
 - name: restart_ip6tables
   service: 
     name: ip6tables 
-    state: restarted 
+    state: restarted
+
+- name: save_ipset
+  shell: ipset save > /etc/sysconfig/ipset
+

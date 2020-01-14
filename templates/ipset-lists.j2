@@ -1,0 +1,5 @@
+# This file contains ipset lists to update from various sources
+# Format is name|url|ipset hash type
+{% for list in ipset_block_lists %}
+{{ list.name }}|{{ list.url }}|{{ list.type }}
+{% endfor %}

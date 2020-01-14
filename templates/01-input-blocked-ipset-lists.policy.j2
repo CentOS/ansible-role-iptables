@@ -1,0 +1,4 @@
+# This file is generated from ansible inventory ipset_block_lists
+{% for list in ipset_block_lists %}
+-A INPUT -m set --match-set blocked-{{ list.name }} src -j REJECT
+{% endfor %}

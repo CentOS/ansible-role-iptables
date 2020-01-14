@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# This script will parse a config file coming from ansible
+# It will define which ipset lists we want to download and apply in ipset
+# Ansible will also create the corresponding rules automatically based on names from that list
+#
+
+config_file="/etc/sysconfig/ipset-lists"
+log_file="/var/log/centos-ipset-update.log"
+
+tmp_dir=$(mktemp -d)
+pushd $tmp_dir 2>&1 >/dev/null
+egrep -v '^#' ${config_file}|while read line ; do 
+  name=$(echo $line|cut -f 1 -d '|')
+  url=$(echo $line|cut -f 2 -d '|')
+  type=$(echo $line|cut -f 3 -d '|')
+  curl --silent --fail ${url} > blocked-${name}
+  if [ "$?" -eq "0" ]; then
+    ipset list -t |grep -q blocked-${name} && ipset flush blocked-${name} || ipset create blocked-${name} ${type}
+    egrep -v '^#' blocked-${name}| while read subnet ; do ipset add blocked-${name} $subnet;done
+  else
+    echo "Error downloading from ${url}" >> $log_file
+    exit 1    
+  fi
+done
+popd 2>&1 > /dev/null
+/bin/rm -Rf $tmp_dir 2>&1 >/dev/null
+
+ipset save > /etc/sysconfig/ipset
+

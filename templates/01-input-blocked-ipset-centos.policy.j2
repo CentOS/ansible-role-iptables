@@ -1,0 +1,4 @@
+# This rule permits to quickly (manuall) had IP to blocked-centos-list ipset
+# There are other rules, using automatically generated lists, but using different variables
+# To add, "ipset add blocked-centos-manual $ip" and it will be dropped directly, no need to reload iptables
+-A INPUT -m set --match-set blocked-centos-manual src -j REJECT

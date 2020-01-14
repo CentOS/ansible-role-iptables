@@ -67,6 +67,20 @@ iptables_redirects: []
 # Docker host ? (for the docker specific nat rules
 iptables_docker_host: false
 
+# Ipset rules
+# By default we have already one centos ipset list
+# but we can also have some coming from various sources and updated automatically, like from firehol
+# example:
+# ipset_block_lists:
+#   - name: country-belgium
+#     url: http://ipdeny.com/ipblocks/data/aggregated/be-aggregated.zone
+#     type: hash:net
+#   - name: php_spammers-7d
+#     url: https://iplists.firehol.org/files/php_spammers_7d.ipset
+#     type: hash:net
+
+ipset_block_lists: []
+
 ##############################
 # IPv6 default variables
 ##############################
