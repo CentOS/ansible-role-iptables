@@ -23,5 +23,5 @@
     state: restarted
 
 - name: save_ipset
-  shell: ipset save > /etc/sysconfig/ipset
+  shell: /sbin/ipset save > /etc/sysconfig/ipset
 

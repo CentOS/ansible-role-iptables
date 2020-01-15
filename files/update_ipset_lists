@@ -9,23 +9,30 @@ PATH=$PATH:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bi
 config_file="/etc/sysconfig/ipset-lists"
 log_file="/var/log/centos-ipset-update.log"
 
+f_log() {
+   echo "[+] $(date +%Y%m%d-%H:%M) Ipset lists refresh -> $*" >>$log_file
+}
+
+f_log "Starting ipset lists update ..."
 tmp_dir=$(mktemp -d)
 pushd $tmp_dir 2>&1 >/dev/null
 egrep -v '^#' ${config_file}|while read line ; do 
   name=$(echo $line|cut -f 1 -d '|')
   url=$(echo $line|cut -f 2 -d '|')
   type=$(echo $line|cut -f 3 -d '|')
+  f_log "Updating list ${name} from url ${url}"
   curl --silent --fail ${url} > blocked-${name}
   if [ "$?" -eq "0" ]; then
     ipset list -t |grep -q blocked-${name} && ipset flush blocked-${name} || ipset create blocked-${name} ${type}
     egrep -v '^#' blocked-${name}| while read subnet ; do ipset add blocked-${name} $subnet;done
   else
-    echo "Error downloading from ${url}" >> $log_file
+    echo "Error downloading from ${url} ... skipping" >> $log_file
     exit 1    
   fi
 done
 popd 2>&1 > /dev/null
 /bin/rm -Rf $tmp_dir 2>&1 >/dev/null
 
+f_log "Ipset lists updated in memory, saving to disk ..."
 ipset save > /etc/sysconfig/ipset
 

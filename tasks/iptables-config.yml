@@ -44,7 +44,7 @@
     state: absent
 
 - name: Ensuring we have a default ipset blocked-centos-manual list
-  shell: 'ipset list -t|egrep -q blocked-centos-manual || ipset create blocked-centos-manual hash:ip'
+  shell: '/sbin/ipset list -t|egrep -q blocked-centos-manual || /sbin/ipset create blocked-centos-manual hash:ip'
   args:
     creates: /etc/sysconfig/ipset
   notify:
@@ -71,6 +71,7 @@
     name: ipset blacklist refresh
     job: /usr/libexec/centos/update_ipset_lists
     hour: "*/2"
+    minute: 35
     state: present
 
 - name: Adding default ipset list for centos
