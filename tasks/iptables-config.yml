@@ -1,11 +1,8 @@
 # some cloud images don't have firewalld, so installing to then disable it
 - name: Ensuring iptables pkgs are installed on CentOS 7.x 
-  yum: name={{ item }} state=installed
-  with_items:
-    - firewalld
-    - iptables-services
-    - ipset
-    - ipset-service
+  yum: 
+    name: ['firewalld', 'iptables-services', 'ipset', 'ipset-service']
+    state: installed
 
 - name: Ensuring firewalld is stopped on CentOS 7.x
   service: 
@@ -71,7 +68,7 @@
     name: ipset blacklist refresh
     job: /usr/libexec/centos/update_ipset_lists
     hour: "*/2"
-    minute: 35
+    minute: "35"
     state: present
 
 - name: Adding default ipset list for centos
