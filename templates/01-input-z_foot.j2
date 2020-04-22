@@ -1,4 +1,4 @@
-
+{% if iptables_default_reject_footer -%}
 # End of computed iptables rules, so denying all the rest
 -A INPUT -j REJECT --reject-with icmp-host-prohibited
-
+{% endif %}

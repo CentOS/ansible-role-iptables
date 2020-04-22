@@ -1,3 +1,5 @@
+-A FORWARD -i {{ iptables_gw_external_iface }} -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -i {{ iptables_gw_internal_iface }} -m conntrack --ctstate ESTABLISHED -j ACCEPT
 {% for rule in iptables_forward_allow %}
 
 {% if rule.protocol is defined -%}

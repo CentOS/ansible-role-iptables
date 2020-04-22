@@ -1,0 +1,10 @@
+
+*filter
+:INPUT {{ iptables_default_input_policy }} [0:0]
+:FORWARD {{ iptables_default_forward_policy }} [0:0]
+:OUTPUT {{ iptables_default_output_policy }} [0:0]
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+#-A OUTPUT -o eth0 -j ACCEPT
+
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
