@@ -105,7 +105,7 @@
     src: "{{ item }}.j2" 
     dest: "/etc/sysconfig/iptables.d/{{ item }}"
   with_items:
-   - 00-nat-11-postrouting
+    - 00-nat-11-postrouting
     - 00-nat-12-prerouting
     - 98-forward-11-allow
   when: iptables_gw
