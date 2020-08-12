@@ -62,6 +62,7 @@ iptables_nat_postrouting_allow:
 # default is empty list, but we can have something like
 # iptables_nat_prerouting_allow:
 #   - source: "0.0.0.0/0"
+#     protocol: tcp
 #     dport: 8080
 #     dest_host_port: "192.168.122.2:80"
 # In this case, don't forget to add it in the iptables_forward_allow rules or it would be blocked
