@@ -21,6 +21,7 @@
   copy: 
     src: "{{ item }}" 
     dest: "/etc/sysconfig/iptables.d/{{ item }}"
+    mode: 0644
   with_items:
     - 99-filter-commit
     - 98-forward-0_head
@@ -31,6 +32,7 @@
   template:
     src: "{{ item }}.j2"
     dest: "/etc/sysconfig/iptables.d/{{ item }}"
+    mode: 0644
   with_items:
     - 01-input-0_head
     - 01-input-z_foot
@@ -40,6 +42,7 @@
   template:
     src: 01-input-service-default-sshd.policy.j2
     dest: /etc/sysconfig/iptables.d/01-input-allowed-sshd.policy
+    mode: 0644
 
 - name: Ensuring we don't have old sshd policy in place
   file:
@@ -63,6 +66,7 @@
   template:
     src: ipset-lists.j2
     dest: /etc/sysconfig/ipset-lists
+    mode: 0644
   register: ipset_lists_config
 
 - name: Forcing ipset lists update when modified
@@ -81,6 +85,7 @@
   template: 
     src: "{{ item }}.j2"
     dest: "/etc/sysconfig/iptables.d/{{ item }}"
+    mode: 0644
   with_items:
     - 01-input-blocked-ipset-centos.policy
     - 01-input-blocked-ipset-lists.policy
@@ -89,12 +94,14 @@
   template: 
     src: 01-input-localrules-policy.j2 
     dest: /etc/sysconfig/iptables.d/01-input-localrules-policy
+    mode: 0644
   when: iptables_local_input_rules is defined
 
 - name: Adding rules for Docker host[s]
   copy: 
     src: "{{ item }}" 
     dest: "/etc/sysconfig/iptables.d/{{ item }}"
+    mode: 0644
   with_items:
     - 00-nat-10-postrouting-docker
     - 98-forward-10-docker
@@ -104,6 +111,7 @@
   template: 
     src: "{{ item }}.j2" 
     dest: "/etc/sysconfig/iptables.d/{{ item }}"
+    mode: 0644
   with_items:
     - 00-nat-11-postrouting
     - 00-nat-12-prerouting
@@ -114,6 +122,7 @@
   template: 
     src: "{{ item }}.j2" 
     dest: "/etc/sysconfig/iptables.d/{{ item }}"
+    mode: 0644
   with_items:
     - 00-nat-10-redirect
 

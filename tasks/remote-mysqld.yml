@@ -2,6 +2,7 @@
   template: 
     src: roles/iptables/templates/01-input-service-mysqld-remote-policy.j2 
     dest: /etc/sysconfig/iptables.d/01-input-service-mysqld-remote-policy-{{ inventory_hostname }}.j2
+    mode: 0644
   when: manage_iptables
   delegate_to: "{{ mysql_host }}"
 

@@ -4,6 +4,7 @@
   template: 
     src: roles/iptables/templates/ipv6/01-input-service-policy.j2 
     dest: /etc/sysconfig/ip6tables.d/01-input-service-policy-{{ iptables_policy_name }}
+    mode: 0644
   when: manage_iptables
 
 - name: Building ip6tables config file

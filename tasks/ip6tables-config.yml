@@ -7,6 +7,7 @@
   copy: 
     src: "files/ipv6/{{ item }}" 
     dest: "/etc/sysconfig/ip6tables.d/{{ item }}"
+    mode: 0644
   with_items:
     - 99-filter-commit
     - 98-forward-0_head
@@ -14,21 +15,24 @@
     - 01-input-0_head
     - 01-input-z_foot
 
-- name: Configuring incoming sshd allowed IP                                                                         
+- name: Configuring incoming sshd allowed IP
   template:
     src: ipv6/01-input-service-default-sshd.policy.j2
     dest: /etc/sysconfig/ip6tables.d/01-input-service-default-sshd.policy
+    mode: 0644
 
 - name: Implementing local ipv6 firewall rule[s], if any
   template: 
     src: ipv6/01-input-localrules-policy.j2 
     dest: /etc/sysconfig/ip6tables.d/01-input-localrules-policy
+    mode: 0644
   when: ip6tables_local_input_rules is defined
 
 - name: Adding ipv6 forward rule if needed
   template: 
     src: "ipv6/{{ item }}.j2" 
     dest: "/etc/sysconfig/ip6tables.d/{{ item }}"
+    mode: 0644
   with_items:
     - 98-forward-11-allow
   when: ip6tables_gw
