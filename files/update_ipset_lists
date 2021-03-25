@@ -23,7 +23,7 @@ egrep -v '^#' ${config_file}|while read line ; do
   f_log "Updating list ${name} from url ${url}"
   curl --silent --fail ${url} > blocked-${name}
   if [ "$?" -eq "0" ]; then
-    ipset list -t |grep -q blocked-${name} && ipset flush blocked-${name} || ipset create blocked-${name} ${type}
+    ipset list -t |grep -q blocked-${name} && ipset flush blocked-${name} || ipset create blocked-${name} ${type} maxelem 262144
     egrep -v '^#' blocked-${name}| while read subnet ; do ipset add blocked-${name} $subnet;done
   else
     echo "Error downloading from ${url} ... skipping" >> $log_file
