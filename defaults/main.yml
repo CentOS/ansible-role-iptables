@@ -11,6 +11,17 @@ manage_iptables: True
 iptables_sshd_allowed_from:
   - 0.0.0.0/0
 
+# Deny/block rules
+# Only if defined, it will render a template to block traffic
+# iptables_block_rules:
+#   - source: 129.2.2.2 # just drop for that host against https
+#     protocol: tcp # specifying tcp but it's the default if not defined
+#     dport: 443
+#     action: DROP # if we don't specify, default is REJECT
+#   - source: 192.168.1.1 # reject all from that host
+#     protocol: '' # Specifying None means "all protocols"
+    
+
 # Local iptables rules not defined by roles
 # Not present by default, so skipped by iptables task/main.yml
 # protocol default: tcp

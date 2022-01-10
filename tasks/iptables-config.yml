@@ -97,6 +97,13 @@
     mode: 0644
   when: iptables_local_input_rules is defined
 
+- name: Implementing blocking/deny rules, if defined
+  template: 
+    src: 01-input-blocked-denylist.policy.j2
+    dest: /etc/sysconfig/iptables.d/01-input-blocked-denylist.policy
+    mode: 0644
+  when: iptables_block_rules is defined
+
 - name: Adding rules for Docker host[s]
   copy: 
     src: "{{ item }}" 
