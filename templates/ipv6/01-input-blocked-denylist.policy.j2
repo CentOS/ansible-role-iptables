@@ -1,0 +1,46 @@
+# Local rules defined through ansible ip6tables_block_rules
+{% for rule in ip6tables_block_rules %}
+
+{% if rule.dport is defined -%}
+{% set ip6tables_dport = '--dport ' + rule.dport|string %}
+{% else %}
+{% set ip6tables_dport = '' %}
+{% endif -%}
+
+{# Note that the conditional is flipped from how we handle the dport, this is
+ because previously we set a default to tcp if the protocol was undefined. If
+ we want to set ip-based INPUT rules (for all protocols), we need to
+ explicitly set rule.protocol to None
+#}
+{% if rule.protocol is not defined -%}
+{% set ip6tables_protocol = '-p ' + 'tcp' %}
+{% elif rule.protocol == '' %}
+{% set ip6tables_protocol = '' %}
+{% else %}
+{% set ip6tables_protocol = '-p ' + rule.protocol %}
+{% endif %}
+
+{% if rule.source is not defined -%}
+{% set ip6tables_source = '--source ' + '::/0' %}
+{% elif rule.source == '' %}
+{% set ip6tables_source = '' %}
+{% else %}
+{% set ip6tables_source = '--source ' + rule.source|string %}
+{% endif %}
+
+{# This is a 'new' conditional, so we can use the same pattern as above #}
+{% if rule.destination is defined -%}
+{% set ip6tables_destination = '--destination ' + rule.destination|string %}
+{% else %}
+{% set ip6tables_destination = '' %}
+{% endif %}
+
+{% if rule.action is not defined -%}
+{% set ip6tables_action = 'REJECT' %}
+{% else %}
+{% set ip6tables_action = rule.action|string %}
+{% endif %}
+
+-A INPUT {{ ip6tables_protocol }} {{ ip6tables_source }} {{ ip6tables_dport }}  {{ ip6tables_destination }} -j {{ ip6tables_action }}
+
+{% endfor %}

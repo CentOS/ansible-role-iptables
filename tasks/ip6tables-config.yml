@@ -28,6 +28,13 @@
     mode: 0644
   when: ip6tables_local_input_rules is defined
 
+- name: Implementing blocking/deny ipv6 rules, if defined
+  template: 
+    src: ipv6/01-input-blocked-denylist.policy.j2
+    dest: /etc/sysconfig/ip6tables.d/01-input-blocked-denylist.policy
+    mode: 0644
+  when: ip6tables_block_rules is defined
+
 - name: Adding ipv6 forward rule if needed
   template: 
     src: "ipv6/{{ item }}.j2" 
