@@ -1,0 +1,56 @@
+# Common ipset features for both ipv4 and ipv6
+
+- name: Ensuring we have a default ipset blocked-centos-manual list
+  shell: "/sbin/ipset list -t|egrep -q {{ item.name }} || /sbin/ipset create {{ item.name }} hash:ip family {{ item.ipversion }} ; touch /etc/sysconfig/ipset-{{ item.name }}"
+  args:
+    creates: "/etc/sysconfig/ipset-{{ item.name }}"
+  loop:
+    - { name: 'blocked-centos-manual', ipversion: 'inet' }
+    - { name: 'blocked-centos-manual-ipv6', ipversion: 'inet6' }
+  notify:
+    - save_ipset
+
+
+- name: Script to update ipset lists
+  copy:
+    src: update_ipset_lists
+    dest: /usr/libexec/centos/update_ipset_lists
+    mode: 0755
+
+- name: Configuring ipset lists to update on regular basis
+  template:
+    src: ipset-lists.j2
+    dest: /etc/sysconfig/ipset-lists
+    mode: 0644
+  register: ipset_lists_config
+
+- name: Forcing ipset lists update when modified
+  command: /usr/libexec/centos/update_ipset_lists
+  when: ipset_lists_config is changed
+
+- name: Refreshing ipset lists
+  cron:
+    name: ipset blacklist refresh
+    job: /usr/libexec/centos/update_ipset_lists
+    hour: "*/2"
+    minute: "35"
+    state: present
+
+- name: Adding default ipset ipv4 lists for centos
+  template: 
+    src: "{{ item }}.j2"
+    dest: "/etc/sysconfig/iptables.d/{{ item }}"
+    mode: 0644
+  with_items:
+    - 01-input-blocked-ipset-centos.policy
+    - 01-input-blocked-ipset-lists.policy
+
+- name: Adding default ipset ipv6 lists for centos
+  template: 
+    src: "ipv6/{{ item }}.j2"
+    dest: "/etc/sysconfig/ip6tables.d/{{ item }}"
+    mode: 0644
+  with_items:
+    - 01-input-blocked-ipset-centos.policy
+    - 01-input-blocked-ipset-lists.policy
+

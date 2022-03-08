@@ -1,10 +1,10 @@
 # some cloud images don't have firewalld, so installing to then disable it
-- name: Ensuring iptables pkgs are installed on CentOS 7.x 
+- name: Ensuring iptables pkgs are installed 
   yum: 
     name: ['firewalld', 'iptables-services', 'ipset', 'ipset-service']
     state: installed
 
-- name: Ensuring firewalld is stopped on CentOS 7.x
+- name: Ensuring firewalld is stopped 
   service: 
     name: firewalld 
     state: stopped 
@@ -49,46 +49,8 @@
     path: /etc/sysconfig/iptables.d/01-input-service-default-sshd.policy
     state: absent
 
-- name: Ensuring we have a default ipset blocked-centos-manual list
-  shell: '/sbin/ipset list -t|egrep -q blocked-centos-manual || /sbin/ipset create blocked-centos-manual hash:ip'
-  args:
-    creates: /etc/sysconfig/ipset
-  notify:
-    - save_ipset
-
-- name: Script to update ipset lists
-  copy:
-    src: update_ipset_lists
-    dest: /usr/libexec/centos/update_ipset_lists
-    mode: 0755
-
-- name: Configuring ipset lists to update on regular basis
-  template:
-    src: ipset-lists.j2
-    dest: /etc/sysconfig/ipset-lists
-    mode: 0644
-  register: ipset_lists_config
-
-- name: Forcing ipset lists update when modified
-  command: /usr/libexec/centos/update_ipset_lists
-  when: ipset_lists_config is changed
-
-- name: Refreshing ipset lists
-  cron:
-    name: ipset blacklist refresh
-    job: /usr/libexec/centos/update_ipset_lists
-    hour: "*/2"
-    minute: "35"
-    state: present
-
-- name: Adding default ipset list for centos
-  template: 
-    src: "{{ item }}.j2"
-    dest: "/etc/sysconfig/iptables.d/{{ item }}"
-    mode: 0644
-  with_items:
-    - 01-input-blocked-ipset-centos.policy
-    - 01-input-blocked-ipset-lists.policy
+# Including common ipset, covering both ipv4 and ipv6 ipset lists
+- include_tasks: common-ipset.yml
 
 - name: Implementing local firewall rule[s], if any
   template: 

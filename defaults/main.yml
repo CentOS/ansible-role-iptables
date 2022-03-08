@@ -3,7 +3,11 @@
 manage_iptables: True
 
 # This role will cover both ipv4 and ipv6 so take that into account
-# Some vars are specific to one or the other
+# Some vars are specific to one or the other, so consider each section
+
+##############################
+# IPv4 default variables
+##############################
 
 # IPv4 default variables
 # sshd tuning : ideally not wide-open, so you can restrict through list
@@ -97,20 +101,6 @@ iptables_redirects: []
 # Docker host ? (for the docker specific nat rules
 iptables_docker_host: false
 
-# Ipset rules
-# By default we have already one centos ipset list
-# but we can also have some coming from various sources and updated automatically, like from firehol
-# example:
-# ipset_block_lists:
-#   - name: country-belgium
-#     url: http://ipdeny.com/ipblocks/data/aggregated/be-aggregated.zone
-#     type: hash:net
-#   - name: php_spammers-7d
-#     url: https://iplists.firehol.org/files/php_spammers_7d.ipset
-#     type: hash:net
-
-ipset_block_lists: []
-
 ##############################
 # IPv6 default variables
 ##############################
@@ -134,3 +124,31 @@ ip6tables_sshd_allowed_from:
 ip6tables_forward_allow:
   - source: "::/0"
     destination: "::/0"
+
+
+###################################################
+#
+# Common section for ipset / used for ipv4/ipv6
+#
+##################################################
+
+
+# Ipset rules
+# By default we have already one centos ipset list
+# but we can also have some coming from various sources and updated automatically, like from firehol
+# Worth knowing that if 'ipver' is set to 'inet6', it will be used for ipv6, and default being ipv4
+# example:
+# ipset_block_lists:
+#   - name: country-belgium
+#     url: https://www.ipdeny.com/ipblocks/data/aggregated/be-aggregated.zone
+#     type: hash:net
+#   - name: country-belgium-ipv6
+#     url: https://www.ipdeny.com/ipv6/ipaddresses/aggregated/be-aggregated.zone
+#     type: hash:net
+#     ipver: inet6
+#   - name: php_spammers-7d
+#     url: https://iplists.firehol.org/files/php_spammers_7d.ipset
+#     type: hash:net
+
+ipset_block_lists: []
+

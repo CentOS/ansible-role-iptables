@@ -20,14 +20,15 @@ egrep -v '^#' ${config_file}|while read line ; do
   name=$(echo $line|cut -f 1 -d '|')
   url=$(echo $line|cut -f 2 -d '|')
   type=$(echo $line|cut -f 3 -d '|')
+  ipfamily=$(echo $line|cut -f 4 -d '|')
   f_log "Updating list ${name} from url ${url}"
   curl --silent --fail ${url} > blocked-${name}
   if [ "$?" -eq "0" ]; then
-    ipset list -t |grep -q  blocked-${name} || ipset create blocked-${name} ${type} maxelem 262144
-    ipset create blocked-${name}-new ${type} maxelem 262144
-    egrep -v '^#' blocked-${name}| while read subnet ; do ipset add blocked-${name}-new $subnet;done
-    ipset swap blocked-${name}-new blocked-${name}
-    ipset destroy blocked-${name}-new
+    ipset list -t |grep -q  blocked-${name} || ipset create blocked-${name} ${type} maxelem 262144 family ${ipfamily}
+    ipset create stg-${name} ${type} maxelem 262144 family ${ipfamily}
+    egrep -v '^#' blocked-${name}| while read subnet ; do ipset add stg-${name} $subnet;done
+    ipset swap stg-${name} blocked-${name}
+    ipset destroy stg-${name}
   else
     echo "Error downloading from ${url} ... skipping" >> $log_file
     exit 1    

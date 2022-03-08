@@ -1,6 +1,6 @@
 # This file is generated from ansible inventory ipset_block_lists
 {% for list in ipset_block_lists %}
-{% if list.ipver is not defined or list.ipver == 'inet' %}
+{% if list.ipver is defined and list.ipver == 'inet6' %}
 -A INPUT -m set --match-set blocked-{{ list.name }} src -j REJECT
 {% endif %}
 {% endfor %}
