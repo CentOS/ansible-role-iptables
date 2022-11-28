@@ -77,6 +77,15 @@
     - 98-forward-10-docker
   when: iptables_docker_host
 
+- name: Adding rules for ipsec host[s]
+  template: 
+    src: "{{ item }}.j2" 
+    dest: "/etc/sysconfig/iptables.d/{{ item }}"
+    mode: 0644
+  with_items:
+    - 01-input-ipsec-policy
+  when: iptables_ipsec_host
+
 - name: Adding forward/NAT rule if needed
   template: 
     src: "{{ item }}.j2" 

@@ -98,8 +98,11 @@ iptables_redirects: []
 # For iptables_nat_postrouting_allow we can also specify the action :
 #   action: ACCEPT #it defaults to MASQUERADE
  
-# Docker host ? (for the docker specific nat rules
+# Docker host ? (for the docker specific nat rules)
 iptables_docker_host: false
+
+# Are we an ipsec host ? if turned on we'll allow ah/esp protocols
+iptables_ipsec_host: False
 
 ##############################
 # IPv6 default variables

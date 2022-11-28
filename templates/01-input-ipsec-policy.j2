@@ -1,0 +1,5 @@
+# Allowing ipsec traffic on {{ inventory_hostname }} as ipsec_ipsec_host boolean is turned on
+-I INPUT -p ah -j ACCEPT
+-I INPUT -p esp -j ACCEPT
+-I INPUT -p udp --dport 500 -j ACCEPT
+-I INPUT -p udp --dport 4500 -j ACCEPT
