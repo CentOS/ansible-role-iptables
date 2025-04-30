@@ -1,0 +1,3 @@
+# Rejecting by default now everything that isn't allowed through input rules
+add rule inet filter INPUT counter reject with icmp type host-prohibited
+add rule inet filter INPUT counter reject with icmpv6 type admin-prohibited

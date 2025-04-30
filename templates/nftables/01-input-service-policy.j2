@@ -1,0 +1,2 @@
+# {{ iptables_policy_name }} ipv4 nft rule
+add rule inet filter INPUT ct state new ip saddr {{ iptables_source|default('0.0.0.0/0') }} {{ iptables_protocol|default('tcp') }} dport {{ iptables_port }} counter accept

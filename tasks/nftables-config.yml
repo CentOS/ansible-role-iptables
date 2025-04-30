@@ -1,0 +1,74 @@
+- name: Ensuring nftables pkgs are installed
+  yum:
+    name:
+      - nftables
+      - firewalld
+
+- name: Ensuring firewalld is stopped 
+  service: 
+    name: firewalld 
+    state: stopped 
+    enabled: no
+
+- name: Ensuring folders exist
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /etc/sysconfig/nftables.d
+
+- name: Dropping all default nftables rules
+  template:
+    src: "nftables/{{ item }}"
+    dest: "/etc/sysconfig/nftables.d/{{ item }}"
+    mode: 0644
+  with_items:
+    - 98-forward-0_head
+    - 00-nat-0_head
+
+- name: Dropping templated nftables rules
+  template:
+    src: "nftables/{{ item }}"
+    dest: "/etc/sysconfig/nftables.d/{{ item }}"
+    mode: 0644
+  with_items:
+    - 01-input-0_head
+    - 01-input-z_foot
+    - 98-forward-z_foot
+
+- name: Configuring incoming sshd allowed IP
+  template:
+    src: nftables/01-input-service-default-sshd.policy.j2
+    dest: /etc/sysconfig/nftables.d/01-input-allowed-sshd.policy
+    mode: 0644
+
+- name: Enabling ipv4 routing
+  sysctl: 
+    name: net.ipv4.ip_forward 
+    value: 1 
+    state: present 
+    reload: yes
+  when: iptables_gw
+
+
+- name: Building nftables config file
+  assemble:
+    src: /etc/sysconfig/nftables.d/
+    dest: /etc/sysconfig/nftables.conf
+  notify: restart_nftables
+  register: nftables_config
+
+- name: Reloading nftables rules if changed now
+  service: 
+    name: nftables 
+    state: restarted
+  when: nftables_config is changed
+
+- name: Enabling the nftables service
+  service: 
+    name: "{{ item }}" 
+    state: started 
+    enabled: yes
+  with_items:
+    - nftables
+

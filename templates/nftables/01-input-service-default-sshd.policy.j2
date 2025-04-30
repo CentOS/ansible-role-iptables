@@ -1,0 +1,12 @@
+# Be sure to have sshd open for management stations/subnet through iptables_sshd_allowed_from list at ansible level
+# Because in nftables we use "inet" instead of two ip/ip6 types for chains/tables we just combine here
+
+# ipv4 addresses for sshd access
+{% for ip in iptables_sshd_allowed_from %}
+add rule inet filter INPUT ip saddr {{ ip }} ct state new tcp dport 22 counter accept
+{% endfor %}
+# ipv6 addresses for sshd access
+{% for ip in ip6tables_sshd_allowed_from %}
+add rule inet filter INPUT ip6 saddr {{ ip }} ct state new tcp dport 22 counter accept
+{% endfor %}
+

@@ -1,22 +1,55 @@
-- name: Creating custom iptables policy file[s]
-  template: 
-    src: 01-input-service-policy.j2 
-    dest: /etc/sysconfig/iptables.d/01-input-service-policy-{{ iptables_policy_name }}
-    mode: 0644
-  when: manage_iptables
+# Task to be called from other ansible roles to drop iptables/nftables snippet and ports to be open
+# Divided into two blocks for iptables (up to el9) and nftables (starting from el10)
 
-- name: Building iptables config file
-  assemble: 
-    src: /etc/sysconfig/iptables.d/ 
-    dest: /etc/sysconfig/iptables
-  register: iptables_service_policy
-  when: manage_iptables
+# iptables block
+- block: 
+    - name: Creating custom iptables policy file[s]
+      template: 
+        src: 01-input-service-policy.j2 
+        dest: /etc/sysconfig/iptables.d/01-input-service-policy-{{ iptables_policy_name }}
+        mode: 0644
 
-- name: Reloading custom iptables rule[s] if changed now
-  service: 
-    name: iptables 
-    state: restarted
-  when: iptables_service_policy is changed
-  notify: restart_iptables
+    - name: Building iptables config file
+      assemble: 
+        src: /etc/sysconfig/iptables.d/ 
+        dest: /etc/sysconfig/iptables
+      register: iptables_service_policy
+
+    - name: Reloading custom iptables rule[s] if changed now
+      service: 
+        name: iptables 
+        state: restarted
+      when: iptables_service_policy is changed
+      notify: restart_iptables
+
+  when: 
+    - manage_iptables
+    - ansible_distribution_major_version|int < 10
+
+# nftables block
+- block: 
+    - name: Creating custom nftables policy file[s]
+      template: 
+        src: nftables/01-input-service-policy.j2 
+        dest: /etc/sysconfig/nftables.d/01-input-service-policy-{{ iptables_policy_name }}
+        mode: 0644
+
+    - name: Building nftables config file
+      assemble: 
+        src: /etc/sysconfig/nftables.d/ 
+        dest: /etc/sysconfig/nftables.conf
+      register: nftables_service_policy
+
+    - name: Reloading custom nftables rule[s] if changed now
+      service: 
+        name: nftables 
+        state: restarted
+      when: nftables_service_policy is changed
+      notify: restart_nftables
+
+  when: 
+    - manage_iptables
+    - ansible_distribution_major_version|int > 9
+
 
 

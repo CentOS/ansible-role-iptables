@@ -1,6 +1,17 @@
 - include_tasks: iptables-config.yml
-  when: manage_iptables
+  when: 
+    - manage_iptables
+    - ansible_distribution_major_version|int < 10
 
 - include_tasks: ip6tables-config.yml
-  when: manage_iptables
+  when:
+    - manage_iptables
+    - ansible_distribution_major_version|int < 10
+
+- include_tasks: nftables-config.yml
+  when: 
+    - manage_iptables
+    - ansible_distribution_major_version|int > 9
+
+
 

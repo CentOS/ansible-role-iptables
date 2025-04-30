@@ -1,0 +1,26 @@
+# This file is managed by ansible
+# Don't edit by hand !
+
+# All nftables rules/snippet are dropped into /etc/nftables.d/ and assembled via ansible
+
+# Flushing first existing rules
+flush ruleset
+
+# Adding main tables with default policies
+add table inet filter
+add chain inet filter INPUT { type filter hook input priority 0; policy accept; }
+add chain inet filter FORWARD { type filter hook forward priority 0; policy accept; }
+add chain inet filter OUTPUT { type filter hook output priority 0; policy accept; }
+ 
+# allow ping and traceroute
+add rule inet filter INPUT ip protocol icmp counter accept
+add rule inet filter INPUT ip protocol icmpv6 counter accept
+
+# allow traffic on trusted loopback interface
+add rule inet filter INPUT iifname "lo" counter accept
+
+# Allowing by default ESTABLISHED/RELATED traffic to enter back
+add rule inet filter  INPUT ct state related,established counter accept
+add rule inet filter OUTPUT ct state related,established counter accept
+
+

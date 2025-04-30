@@ -25,3 +25,16 @@
 - name: save_ipset
   shell: /sbin/ipset save > /etc/sysconfig/ipset
 
+- name: rebuild_nftables
+  assemble: 
+    src: /etc/sysconfig/nftables.d/ 
+    dest: /etc/sysconfig/nftables.conf
+  notify:
+    - restart_nftables
+
+- name: restart_nftables
+  service: 
+    name: nftables 
+    state: restarted
+
+
