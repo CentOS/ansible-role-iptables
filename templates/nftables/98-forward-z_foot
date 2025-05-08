@@ -1,0 +1,4 @@
+# Blocking all that isn't allowed as last rule for FORWARD
+add rule inet filter FORWARD counter reject with icmp type host-prohibited
+add rule inet filter FORWARD counter reject with icmpv6 admin-prohibited
+

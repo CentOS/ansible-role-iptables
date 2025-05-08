@@ -1,0 +1,35 @@
+# Local rules defined through ansible ip6tables_block_rules
+{% for rule in ip6tables_block_rules %}
+{% if rule.dport is defined -%}
+{% set ip6tables_dport = 'dport ' + rule.dport|string %}
+{% else %}
+{% set ip6tables_dport = '' %}
+{% endif -%}
+{% if rule.protocol is not defined -%}
+{% set ip6tables_protocol = '' %}
+{% elif rule.protocol == '' %}
+{% set ip6tables_protocol = '' %}
+{% else %}
+{% set ip6tables_protocol = rule.protocol %}
+{% endif %}
+{% if rule.source is not defined -%}
+{% set ip6tables_source = 'ip6 saddr ' + '::/0' %}
+{% elif rule.source == '' %}
+{% set ip6tables_source = '' %}
+{% else %}
+{% set ip6tables_source = 'ip6 saddr ' + rule.source|string %}
+{% endif %}
+{# This is a 'new' conditional, so we can use the same pattern as above #}
+{% if rule.destination is defined -%}
+{% set ip6tables_destination = 'ip6 daddr ' + rule.destination|string %}
+{% else %}
+{% set ip6tables_destination = '' %}
+{% endif %}
+{% if rule.action is not defined -%}
+{% set ip6tables_action = 'reject with icmp type host-prohibited' %}
+{% else %}
+{% set ip6tables_action = rule.action|string|lower %}
+{% endif %}
+add rule inet filter INPUT {{ ip6tables_source }} {{ ip6tables_protocol }} {{ ip6tables_dport }} {{ ip6tables_destination }} counter {{ ip6tables_action }}
+{% endfor %}
+

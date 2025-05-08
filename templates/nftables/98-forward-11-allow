@@ -1,0 +1,37 @@
+# IPv4 block
+{% for rule in iptables_forward_allow %}
+
+{% if rule.protocol is defined -%}
+{% set iptables_protocol = rule.protocol %}
+{% else %}
+{% set iptables_protocol = '' %}
+{% endif -%}
+
+{% if rule.dport is defined -%}
+{% set iptables_dport = rule.dport|string %}
+{% else %}
+{% set iptables_dport = '' %}
+{% endif -%}
+
+add rule inet filter FORWARD ip saddr {{ rule.source|default('0.0.0.0/0') }} ip daddr {{ rule.destination|default('0.0.0.0/0') }} {{ iptables_protocol }} {{ iptables_dport }} counter accept
+
+{% endfor %}
+
+# IPv6 block
+{% for rule in ip6tables_forward_allow %}
+
+{% if rule.protocol is defined -%}
+{% set iptables_protocol = rule.protocol %}
+{% else %}
+{% set iptables_protocol = '' %}
+{% endif -%}
+
+{% if rule.dport is defined -%}
+{% set iptables_dport = rule.dport|string %}
+{% else %}
+{% set iptables_dport = '' %}
+{% endif -%}
+
+add rule inet filter FORWARD ip6 saddr {{ rule.source|default('::/0') }} ip6 daddr {{ rule.destination|default('::/0') }} {{ iptables_protocol }} {{ iptables_dport }} counter accept
+
+{% endfor %}

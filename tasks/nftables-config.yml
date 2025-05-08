@@ -17,15 +17,6 @@
   with_items:
     - /etc/sysconfig/nftables.d
 
-- name: Dropping all default nftables rules
-  template:
-    src: "nftables/{{ item }}"
-    dest: "/etc/sysconfig/nftables.d/{{ item }}"
-    mode: 0644
-  with_items:
-    - 98-forward-0_head
-    - 00-nat-0_head
-
 - name: Dropping templated nftables rules
   template:
     src: "nftables/{{ item }}"
@@ -34,6 +25,7 @@
   with_items:
     - 01-input-0_head
     - 01-input-z_foot
+    - 98-forward-0_head
     - 98-forward-z_foot
 
 - name: Configuring incoming sshd allowed IP
@@ -42,12 +34,57 @@
     dest: /etc/sysconfig/nftables.d/01-input-allowed-sshd.policy
     mode: 0644
 
-- name: Enabling ipv4 routing
-  sysctl: 
-    name: net.ipv4.ip_forward 
-    value: 1 
-    state: present 
-    reload: yes
+- name: Implementing local ipv4 firewall rule[s], if any
+  template: 
+    src: nftables/01-input-localrules-policy.j2 
+    dest: /etc/sysconfig/nftables.d/01-input-localrules-policy
+    mode: 0644
+  when: iptables_local_input_rules is defined
+
+- name: Implementing ipv4 blocking/deny rules, if defined
+  template:                                                                                                        
+    src: nftables/01-input-blocked-denylist.policy.j2
+    dest: /etc/sysconfig/nftables.d/01-input-blocked-denylist.policy
+    mode: 0644
+  when: iptables_block_rules is defined
+
+- name: Clearing ipv4 blocking/deny rules, if undefined
+  file:                                                                                                        
+    path: /etc/sysconfig/nftables.d/01-input-blocked-denylist.policy
+    state: absent
+  when: iptables_block_rules is not defined
+
+- name: Implementing ipv6 blocking/deny rules, if defined
+  template:                                                                                                        
+    src: nftables/01-input-blocked_v6-denylist.policy.j2
+    dest: /etc/sysconfig/nftables.d/01-input-blocked_v6-denylist.policy
+    mode: 0644
+  when: ip6tables_block_rules is defined
+
+- name: Clearing ipv6 blocking/deny rules, if undefined
+  file:                                                                                                        
+    path: /etc/sysconfig/nftables.d/01-input-blocked_v6-denylist.policy
+    state: absent
+  when: ip6tables_block_rules is not defined
+
+# Whole block to include if host is router/gw (iptables_gw boolean)
+- block:
+    - name: Enabling ipv4 routing
+      sysctl: 
+        name: net.ipv4.ip_forward 
+        value: 1 
+        state: present 
+        reload: yes
+    - name: Adding forward/NAT rule if needed
+      template: 
+        src: "nftables/{{ item }}" 
+        dest: "/etc/sysconfig/nftables.d/{{ item }}"
+        mode: 0644
+      with_items:
+        - 05-nat-10-postrouting
+        - 05-nat-12-prerouting
+        - 98-forward-11-allow
+    
   when: iptables_gw
 
 

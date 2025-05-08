@@ -1,0 +1,9 @@
+{% for rule in iptables_redirects %}
+
+{% if rule.protocol is defined -%}
+{% set iptables_protocol = rule.protocol %}
+{% else %}
+{% set iptables_protocol = 'tcp' %}
+{% endif -%}
+add rule inet filter PREROUTING {{ iptables_protocol }} --dport {{ rule.dport }} counter redirect to :{{ rule.lport }}
+{% endfor %}

@@ -1,0 +1,17 @@
+{% for rule in iptables_nat_postrouting_allow %}
+
+{% if rule.protocol is defined -%}
+{% set iptables_protocol = rule.protocol %}
+{% else %}
+{% set iptables_protocol = '' %}
+{% endif -%}
+
+{% if rule.dport is defined -%}
+{% set iptables_dport = rule.dport|string %}
+{% else %}
+{% set iptables_dport = '' %}
+{% endif -%}
+
+add rule inet filter POSTROUTING ip saddr {{ rule.source|default('0.0.0.0/0') }} ip daddr {{ rule.destination|default('0.0.0.0/0') }} {{ iptables_protocol }} {{ iptables_dport }} counter {{ rule.action|default('masquerade') }}
+
+{% endfor %}

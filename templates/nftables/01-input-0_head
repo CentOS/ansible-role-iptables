@@ -11,7 +11,19 @@ add table inet filter
 add chain inet filter INPUT { type filter hook input priority 0; policy accept; }
 add chain inet filter FORWARD { type filter hook forward priority 0; policy accept; }
 add chain inet filter OUTPUT { type filter hook output priority 0; policy accept; }
+add chain inet filter POSTROUTING { type nat hook postrouting priority 100; } 
+add chain inet filter PREROUTING { type nat hook prerouting priority -100; }
+
  
+# Adding some sets in which we can manually or automation add/remove ipv{4,6} addresses to be just dropped (DDoS)
+# Dropping these sets directly before accepting anything else so use with caution !
+# how: nft add element inet filter blocked_ipv{4,6} { 100.1.1.1, 195.238.0.0/26 }
+add set inet filter blocked_ipv4 { type ipv4_addr ; flags interval ;  auto-merge ; comment "drop list" ; }
+add set inet filter blocked_ipv6 { type ipv6_addr ; flags interval ;  auto-merge ; comment "drop list" ; }
+# inserting the rules to just drop defined sets
+add rule inet filter INPUT ip saddr @blocked_ipv4 counter drop
+add rule inet filter INPUT ip6 saddr @blocked_ipv6 counter drop
+
 # allow ping and traceroute
 add rule inet filter INPUT ip protocol icmp counter accept
 add rule inet filter INPUT ip protocol icmpv6 counter accept

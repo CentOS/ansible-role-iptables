@@ -1,0 +1,35 @@
+# Local rules defined through ansible iptables_block_rules
+{% for rule in iptables_block_rules %}
+{% if rule.dport is defined -%}
+{% set iptables_dport = 'dport ' + rule.dport|string %}
+{% else %}
+{% set iptables_dport = '' %}
+{% endif -%}
+{% if rule.protocol is not defined -%}
+{% set iptables_protocol = '' %}
+{% elif rule.protocol == '' %}
+{% set iptables_protocol = '' %}
+{% else %}
+{% set iptables_protocol = rule.protocol %}
+{% endif %}
+{% if rule.source is not defined -%}
+{% set iptables_source = 'ip saddr ' + '0.0.0.0/0' %}
+{% elif rule.source == '' %}
+{% set iptables_source = '' %}
+{% else %}
+{% set iptables_source = 'ip saddr ' + rule.source|string %}
+{% endif %}
+{# This is a 'new' conditional, so we can use the same pattern as above #}
+{% if rule.destination is defined -%}
+{% set iptables_destination = 'ip daddr ' + rule.destination|string %}
+{% else %}
+{% set iptables_destination = '' %}
+{% endif %}
+{% if rule.action is not defined -%}
+{% set iptables_action = 'reject with icmp type host-prohibited' %}
+{% else %}
+{% set iptables_action = rule.action|string|lower %}
+{% endif %}
+add rule inet filter INPUT {{ iptables_source }} {{ iptables_protocol }} {{ iptables_dport }} {{ iptables_destination }} counter {{ iptables_action }}
+{% endfor %}
+
