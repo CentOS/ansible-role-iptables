@@ -37,4 +37,7 @@
     name: nftables 
     state: restarted
 
+- name: nft_lists_refresh
+  command: 
+    cmd: /usr/libexec/centos/nft-list-refresh
 

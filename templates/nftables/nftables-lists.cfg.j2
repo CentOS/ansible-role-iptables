@@ -1,0 +1,10 @@
+# This file contains ipset lists to update from various sources
+# Format is name|url|ipset hash type
+{% for list in ipset_block_lists %}
+{% if list.ipver is defined and list.ipver=='inet6' %}
+{% set ip_version = 'v6' %}
+{% else %}
+{% set ip_version = 'v4' %}
+{% endif %}
+{{ list.name }}|{{ list.url }}|{{ ip_version }}
+{% endfor %}

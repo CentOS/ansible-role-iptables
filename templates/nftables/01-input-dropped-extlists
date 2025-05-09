@@ -1,0 +1,13 @@
+# This file will create sets/rules based on ipset_block_lists
+# IPv4/IPv6 addresses/ranges will be added dynamically through other script (cron)
+{% for list in ipset_block_lists %}
+{% if list.ipver is defined and list.ipver=='inet6' %}
+{% set element_type = 'ipv6_addr' %}
+{% set ip_type = 'ip6' %}
+{% else %}
+{% set element_type = 'ipv4_addr' %}
+{% set ip_type = 'ip' %}
+{% endif %}
+add set inet filter list_{{ list.name }} { type {{ element_type }} ; flags interval ;  auto-merge ; comment "dropped list" ; }
+add rule inet filter INPUT {{ ip_type }} saddr @list_{{ list.name }} drop
+{% endfor %}

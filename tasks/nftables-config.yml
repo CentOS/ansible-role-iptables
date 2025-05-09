@@ -67,6 +67,13 @@
     state: absent
   when: ip6tables_block_rules is not defined
 
+- name: Configuring external sets/lists to block 
+  template:
+    src: nftables/01-input-dropped-extlists
+    dest: /etc/sysconfig/nftables.d/01-input-dropped-extlists
+    mode: 0644
+
+
 # Whole block to include if host is router/gw (iptables_gw boolean)
 - block:
     - name: Enabling ipv4 routing
@@ -83,8 +90,7 @@
       with_items:
         - 05-nat-10-postrouting
         - 05-nat-12-prerouting
-        - 98-forward-11-allow
-    
+        - 98-forward-11-allow 
   when: iptables_gw
 
 
@@ -109,3 +115,23 @@
   with_items:
     - nftables
 
+- name: Creating config files for external lists to download/insert
+  template:
+    src: nftables/nftables-lists.cfg.j2
+    dest: /etc/nftables-lists.cfg
+    mode: 0644  
+  notify: nft_lists_refresh
+
+- name: Dropping wrapper to download/refresh lists
+  template:
+    src: nftables/nft-lists-refresh
+    dest: /usr/libexec/centos/nft-list-refresh
+    mode: '0755'
+
+- name: Refreshing nft set lists
+  cron:
+    name: nft setlists refresh
+    job: /usr/libexec/centos/nft-list-refresh
+    hour: "*/2"
+    minute: "35"
+    state: present

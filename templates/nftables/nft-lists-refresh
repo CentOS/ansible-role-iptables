@@ -1,0 +1,21 @@
+#!/bin/bash
+config_file="/etc/nftables-lists.cfg"
+tmp_dir=$(mktemp -d)
+pushd $tmp_dir 2>&1 >/dev/null
+
+grep -v '^#' ${config_file}|while read line ; do 
+  name=$(echo $line|cut -f 1 -d '|')
+  url=$(echo $line|cut -f 2 -d '|')
+  ipfamily=$(echo $line|cut -f 3 -d '|')
+  curl --silent --fail ${url} > blocked-${name}
+  # Download is ok so we can flush set and add elements
+  if [ "$?" -eq "0" ]; then
+    nft flush set inet filter list_${name}
+    nft add element inet filter list_${name} { $(grep -v '^#' blocked-${name}|sed -z 's#\n#, #g;s/,$/\n/')}
+  else
+    exit 1
+  fi
+done
+popd 2>&1 > /dev/null
+/bin/rm -Rf $tmp_dir 2>&1 >/dev/null
+
