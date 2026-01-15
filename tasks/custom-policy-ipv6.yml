@@ -1,23 +1,53 @@
 # IPv6 part
+- block:
+    - name: Creating custom ip6tables policy file[s]
+      template: 
+        src: ipv6/01-input-service-policy.j2 
+        dest: /etc/sysconfig/ip6tables.d/01-input-service-policy-{{ iptables_policy_name }}
+        mode: 0644
+      when: manage_iptables
 
-- name: Creating custom ip6tables policy file[s]
-  template: 
-    src: ipv6/01-input-service-policy.j2 
-    dest: /etc/sysconfig/ip6tables.d/01-input-service-policy-{{ iptables_policy_name }}
-    mode: 0644
-  when: manage_iptables
+    - name: Building ip6tables config file
+      assemble: 
+        src: /etc/sysconfig/ip6tables.d/ 
+        dest: /etc/sysconfig/ip6tables
+      register: iptables_service_policy
+      when: manage_iptables
 
-- name: Building ip6tables config file
-  assemble: 
-    src: /etc/sysconfig/ip6tables.d/ 
-    dest: /etc/sysconfig/ip6tables
-  register: iptables_service_policy
-  when: manage_iptables
+    - name: Reloading custom ip6tables rule[s] if changed now
+      service: 
+        name: ip6tables 
+        state: restarted
+      when: iptables_service_policy is changed
+      notify: restart_iptables
+  when: 
+    - manage_iptables
+    - ansible_distribution_major_version|int < 10
 
-- name: Reloading custom ip6tables rule[s] if changed now
-  service: 
-    name: ip6tables 
-    state: restarted
-  when: iptables_service_policy is changed
-  notify: restart_iptables
+# nftables block
+- block:
+    - name: Creating custom nftables policy file[s]
+      template:
+        src: nftables/01-input-service-policy-ipv6.j2
+        dest: /etc/sysconfig/nftables.d/01-input-service-policy-v6-{{ iptables_policy_name }}
+        mode: 0644
+
+    - name: Building nftables config file
+      assemble:
+        src: /etc/sysconfig/nftables.d/
+        dest: /etc/sysconfig/nftables.conf
+      register: nftables_service_policy
+
+    - name: Reloading custom nftables rule[s] if changed now
+      service:
+        name: nftables
+        state: restarted
+      when: nftables_service_policy is changed
+      notify: restart_nftables
+
+  when:
+    - manage_iptables
+    - ansible_distribution_major_version|int > 9
+
+
 
