@@ -26,7 +26,11 @@ add rule inet filter INPUT ip6 saddr @blocked_ipv6 counter drop
 
 # allow ping and traceroute
 add rule inet filter INPUT ip protocol icmp counter accept
-add rule inet filter INPUT ip protocol icmpv6 counter accept
+add rule inet filter INPUT ip6 nexthdr icmpv6 counter accept
+
+# allow SLAC/DHCPv6
+add rule inet filter INPUT ip6 nexthdr icmpv6 icmpv6 type { nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert } accept
+add rule inet filter INPUT ip6 nexthdr udp udp dport 546 accept
 
 # allow traffic on trusted loopback interface
 add rule inet filter INPUT iifname "lo" counter accept
